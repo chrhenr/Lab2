@@ -113,6 +113,7 @@ playBankHelper deck hand = if value biggerHand >= 16 then biggerHand
     else playBankHelper smallerDeck biggerHand
     where (smallerDeck,biggerHand) = draw deck hand
 
+--B5
 shuffleDeck :: StdGen -> Hand -> Hand
 shuffleDeck g hand = case maybeCard of
         Nothing   -> hand
@@ -141,3 +142,18 @@ prop_shuffle_sameCards g c h = c `belongsTo` h == c `belongsTo` shuffleDeck g h
 
 prop_size_shuffle :: StdGen -> Hand -> Bool
 prop_size_shuffle g hand = size (shuffleDeck g hand) == (size hand)
+
+--B6
+implementation = Interface
+    { iFullDeck = fullDeck
+    , iValue    = value
+    , iDisplay  = display
+    , iGameOver = gameOver
+    , iWinner   = winner 
+    , iDraw     = draw
+    , iPlayBank = playBank
+    , iShuffle  = shuffleDeck
+    }
+
+main :: IO () 
+main = runGame implementation
