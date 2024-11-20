@@ -116,7 +116,7 @@ playBankHelper deck hand = if value biggerHand >= 16 then biggerHand
 
 shuffleDeck :: StdGen -> Hand -> Hand
 shuffleDeck g Empty = Empty
---shuffleDeck g (Add top rest) = 
+shuffleDeck g (Add top rest) = 
 
 nthCard :: Hand -> Int -> Maybe Card
 nthCard Empty n = Nothing
@@ -124,3 +124,19 @@ nthCard (Add card rest) n
     | n < 1     = Nothing
     | n == 1    = Just card
     | otherwise = nthCard rest (n - 1)
+
+removeNthCard :: Hand -> Int -> (Maybe Card, Hand)
+removeNthCard Empty n = (Nothing, Empty)
+removeNthCard (Add card rest) n
+    | n < 1     = (Nothing, Empty)
+    | n == 1    = (Just card, rest)
+    | otherwise = removeNthCard rest (n - 1)
+
+splitDeckAt :: Hand -> Int -> (Hand, Maybe Card, Hand)
+splitDeckAt Empty n = (Empty, Nothing, Empty)
+splitDeckAt hand n | n < 1 = (Empty, Nothing, hand)
+splitDeckAt (Add card rest) n
+    | n == 1    = (Empty, Just card, rest)
+    | otherwise = (Add card top, nthCard, bottom)
+        where (top, nthCard, bottom) = splitDeckAt rest (n - 1)
+
