@@ -112,3 +112,15 @@ playBankHelper :: Hand -> Hand -> Hand
 playBankHelper deck hand = if value biggerHand >= 16 then biggerHand
     else playBankHelper smallerDeck biggerHand
     where (smallerDeck,biggerHand) = draw deck hand
+
+
+shuffleDeck :: StdGen -> Hand -> Hand
+shuffleDeck g Empty = Empty
+--shuffleDeck g (Add top rest) = 
+
+nthCard :: Hand -> Int -> Maybe Card
+nthCard Empty n = Nothing
+nthCard (Hand card rest) n
+    | n < 1     = Nothing
+    | n == 1    = card
+    | otherwise = nthCard rest (n - 1)
