@@ -120,7 +120,7 @@ shuffleDeck g Empty = Empty
 
 nthCard :: Hand -> Int -> Maybe Card
 nthCard Empty n = Nothing
-nthCard (Hand card rest) n
+nthCard (Add card rest) n
     | n < 1     = Nothing
-    | n == 1    = card
+    | n == 1    = Just card
     | otherwise = nthCard rest (n - 1)
