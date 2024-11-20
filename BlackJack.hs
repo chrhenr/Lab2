@@ -66,3 +66,49 @@ winner guestHand bankHand
         | otherwise = Bank  
         where guestValue = value guestHand 
               bankValue  = value bankHand
+
+--B1
+
+addToBottom :: Card -> Hand -> Hand
+addToBottom card Empty = Add card Empty
+addToBottom card (Add top rest) = Add top (addToBottom card rest)
+
+(<+) :: Hand -> Hand -> Hand
+hand <+ Empty = hand
+hand <+ (Add card rest) = addToBottom card hand <+ rest
+
+prop_onTopOf_assoc :: Hand -> Hand -> Hand -> Bool 
+prop_onTopOf_assoc p1 p2 p3 = p1<+(p2<+p3) == (p1<+p2)<+p3
+
+prop_size_onTopOf :: Hand -> Hand -> Bool
+prop_size_onTopOf h1 h2 = size (h1 <+ h2) == size h1 + size h2
+
+--B2
+numerics :: [Rank]
+numerics = [Numeric i | i <- [2..10]]
+
+ranks :: [Rank]
+ranks = numerics ++ [Jack, Queen, King, Ace]
+
+suits :: [Suit]
+suits = [Hearts, Spades, Diamonds, Clubs]
+
+allCards :: [Card]
+allCards = [Card rank suit | suit <- suits, rank <- ranks]
+
+fullDeck :: Hand
+fullDeck = foldr addToBottom Empty allCards
+
+--B3
+draw :: Hand -> Hand -> (Hand,Hand)
+draw Empty _ = error "draw: The deck is empty."
+draw (Add card rest) hand = (rest, Add card hand)
+
+--B4
+playBank :: Hand -> Hand
+playBank deck = playBankHelper deck Empty
+
+playBankHelper :: Hand -> Hand -> Hand
+playBankHelper deck hand = if value biggerHand >= 16 then biggerHand
+    else playBankHelper smallerDeck biggerHand
+    where (smallerDeck,biggerHand) = draw deck hand
