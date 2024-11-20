@@ -113,24 +113,16 @@ playBankHelper deck hand = if value biggerHand >= 16 then biggerHand
     else playBankHelper smallerDeck biggerHand
     where (smallerDeck,biggerHand) = draw deck hand
 
-
 shuffleDeck :: StdGen -> Hand -> Hand
-shuffleDeck g Empty = Empty
-shuffleDeck g (Add top rest) = 
-
-nthCard :: Hand -> Int -> Maybe Card
-nthCard Empty n = Nothing
-nthCard (Add card rest) n
-    | n < 1     = Nothing
-    | n == 1    = Just card
-    | otherwise = nthCard rest (n - 1)
+shuffleDeck g hand = case maybeCard of
+        Nothing   -> hand
+        Just card -> addToBottom card (shuffleDeck g' rest)
+    where (n, g')           = randomR (1, size hand) g
+          (maybeCard, rest) = removeNthCard hand n
 
 removeNthCard :: Hand -> Int -> (Maybe Card, Hand)
-removeNthCard Empty n = (Nothing, Empty)
-removeNthCard (Add card rest) n
-    | n < 1     = (Nothing, Empty)
-    | n == 1    = (Just card, rest)
-    | otherwise = removeNthCard rest (n - 1)
+removeNthCard deck n = (mCard, first <+ rest)
+    where (first, mCard, rest) = splitDeckAt deck n
 
 splitDeckAt :: Hand -> Int -> (Hand, Maybe Card, Hand)
 splitDeckAt Empty n = (Empty, Nothing, Empty)
@@ -140,3 +132,12 @@ splitDeckAt (Add card rest) n
     | otherwise = (Add card top, nthCard, bottom)
         where (top, nthCard, bottom) = splitDeckAt rest (n - 1)
 
+belongsTo :: Card -> Hand -> Bool 
+c `belongsTo` Empty = False 
+c `belongsTo` (Add c' h) = c == c' || c `belongsTo` h
+
+prop_shuffle_sameCards :: StdGen -> Card -> Hand -> Bool 
+prop_shuffle_sameCards g c h = c `belongsTo` h == c `belongsTo` shuffleDeck g h
+
+prop_size_shuffle :: StdGen -> Hand -> Bool
+prop_size_shuffle g hand = size (shuffleDeck g hand) == (size hand)
